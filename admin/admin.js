@@ -3,6 +3,10 @@
 
 const API = "/api";
 
+// ================================================
+// 1. HELPER FUNCTIONS
+// ================================================
+
 function escapeHTML(value) {
     return String(value ?? "").replace(/[&<>"']/g, char => ({
         "&": "&amp;",
@@ -27,6 +31,10 @@ async function apiFetch(url, options = {}) {
     return response;
 }
 
+// ================================================
+// 2. CHECK ADMIN LOGIN
+// ================================================
+
 async function checkLogin() {
     const response = await apiFetch(`${API}/check-login`);
     const result = await response.json();
@@ -38,6 +46,10 @@ async function checkLogin() {
 
     return true;
 }
+
+// ================================================
+// 3. LOAD DASHBOARD STATISTICS
+// ================================================
 
 async function loadStats() {
     const response = await apiFetch(`${API}/stats`);
@@ -60,9 +72,19 @@ async function loadStats() {
     document.getElementById("cancelledBookings").textContent =
         stats.cancelled;
 
-    document.getElementById("paidAmount").textContent =
-        "₹" + Number(stats.paid).toLocaleString("en-IN");
+    // This is the total amount marked as paid in the database.
+    // It is not a payment-status control.
+    const paidAmount = document.getElementById("paidAmount");
+
+    if (paidAmount) {
+        paidAmount.textContent =
+            "₹" + Number(stats.paid).toLocaleString("en-IN");
+    }
 }
+
+// ================================================
+// 4. LOAD BOOKINGS
+// ================================================
 
 async function loadBookings() {
     const response = await apiFetch(`${API}/bookings`);
@@ -72,13 +94,14 @@ async function loadBookings() {
     }
 
     const bookings = await response.json();
+
     const table = document.getElementById("bookingTable");
 
     table.innerHTML = "";
 
     if (bookings.length === 0) {
         table.innerHTML =
-            '<tr><td colspan="11">No bookings found</td></tr>';
+            '<tr><td colspan="10">No bookings found</td></tr>';
         return;
     }
 
@@ -87,27 +110,41 @@ async function loadBookings() {
 
         row.innerHTML = `
             <td>${escapeHTML(booking.id)}</td>
+
             <td>${escapeHTML(booking.name)}</td>
+
             <td>${escapeHTML(booking.email)}</td>
+
             <td>${escapeHTML(booking.destination)}</td>
+
             <td>${escapeHTML(booking.hotel_name)}</td>
-            <td>₹${Number(booking.hotel_price).toLocaleString("en-IN")}</td>
-            <td>${escapeHTML(booking.nights)}</td>
-            <td>₹${Number(booking.amount).toLocaleString("en-IN")}</td>
 
             <td>
-                <select id="status-${booking.id}">
-                    <option value="Pending" ${booking.status === "Pending" ? "selected" : ""}>Pending</option>
-                    <option value="Confirmed" ${booking.status === "Confirmed" ? "selected" : ""}>Confirmed</option>
-                    <option value="Cancelled" ${booking.status === "Cancelled" ? "selected" : ""}>Cancelled</option>
-                </select>
+                ₹${Number(booking.hotel_price).toLocaleString("en-IN")}
+            </td>
+
+            <td>${escapeHTML(booking.nights)}</td>
+
+            <td>
+                ₹${Number(booking.amount).toLocaleString("en-IN")}
             </td>
 
             <td>
-                <select id="payment-${booking.id}">
-                    <option value="Pending" ${booking.payment_status === "Pending" ? "selected" : ""}>Pending</option>
-                    <option value="Paid" ${booking.payment_status === "Paid" ? "selected" : ""}>Paid</option>
-                    <option value="Failed" ${booking.payment_status === "Failed" ? "selected" : ""}>Failed</option>
+                <select id="status-${booking.id}">
+                    <option value="Pending"
+                        ${booking.status === "Pending" ? "selected" : ""}>
+                        Pending
+                    </option>
+
+                    <option value="Confirmed"
+                        ${booking.status === "Confirmed" ? "selected" : ""}>
+                        Confirmed
+                    </option>
+
+                    <option value="Cancelled"
+                        ${booking.status === "Cancelled" ? "selected" : ""}>
+                        Cancelled
+                    </option>
                 </select>
             </td>
 
@@ -127,34 +164,23 @@ async function loadBookings() {
     });
 }
 
-async function saveBooking(id) {
-    const payment_status =
-        document.getElementById(`payment-${id}`).value;
+// ================================================
+// 5. UPDATE BOOKING STATUS
+// ================================================
 
-    const status =
-        document.getElementById(`status-${id}`).value;
+async function saveBooking(id) {
+    const statusElement =
+        document.getElementById(`status-${id}`);
+
+    if (!statusElement) {
+        showMessage("Booking status field not found.");
+        return;
+    }
+
+    const status = statusElement.value;
 
     try {
-        const paymentResponse = await apiFetch(
-            `${API}/bookings/${id}/payment`,
-            {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ payment_status })
-            }
-        );
-
-        const paymentResult = await paymentResponse.json();
-
-        if (!paymentResponse.ok) {
-            throw new Error(
-                paymentResult.message || "Payment update failed."
-            );
-        }
-
-        const statusResponse = await apiFetch(
+        const response = await apiFetch(
             `${API}/bookings/${id}/status`,
             {
                 method: "PATCH",
@@ -165,21 +191,26 @@ async function saveBooking(id) {
             }
         );
 
-        const statusResult = await statusResponse.json();
+        const result = await response.json();
 
-        if (!statusResponse.ok) {
+        if (!response.ok) {
             throw new Error(
-                statusResult.message || "Booking status update failed."
+                result.message || "Booking status update failed."
             );
         }
 
-        showMessage("Booking updated successfully!");
+        showMessage("Booking status updated successfully!");
+
         await refreshDashboard();
 
     } catch (error) {
         showMessage(error.message);
     }
 }
+
+// ================================================
+// 6. DELETE BOOKING
+// ================================================
 
 async function deleteBooking(id) {
     if (!confirm("Do you want to delete this booking?")) {
@@ -189,16 +220,21 @@ async function deleteBooking(id) {
     try {
         const response = await apiFetch(
             `${API}/bookings/${id}`,
-            { method: "DELETE" }
+            {
+                method: "DELETE"
+            }
         );
 
         const result = await response.json();
 
         if (!response.ok) {
-            throw new Error(result.message || "Delete failed.");
+            throw new Error(
+                result.message || "Booking deletion failed."
+            );
         }
 
         showMessage("Booking deleted successfully!");
+
         await refreshDashboard();
 
     } catch (error) {
@@ -206,15 +242,25 @@ async function deleteBooking(id) {
     }
 }
 
+// ================================================
+// 7. ADMIN LOGOUT
+// ================================================
+
 async function logout() {
     try {
         await apiFetch(`${API}/logout`, {
             method: "POST"
         });
+    } catch (error) {
+        showMessage(error.message);
     } finally {
         window.location.href = "/admin/login.html";
     }
 }
+
+// ================================================
+// 8. SHOW MESSAGE
+// ================================================
 
 function showMessage(message) {
     const element = document.getElementById("message");
@@ -224,10 +270,18 @@ function showMessage(message) {
     }
 }
 
+// ================================================
+// 9. REFRESH DASHBOARD
+// ================================================
+
 async function refreshDashboard() {
     await loadBookings();
     await loadStats();
 }
+
+// ================================================
+// 10. START DASHBOARD
+// ================================================
 
 async function startDashboard() {
     try {
