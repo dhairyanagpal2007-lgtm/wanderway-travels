@@ -1,4 +1,6 @@
 
+"use strict";
+
 const API = "/api";
 
 function escapeHTML(value) {
@@ -11,10 +13,22 @@ function escapeHTML(value) {
     })[char]);
 }
 
+async function apiFetch(url, options = {}) {
+    const response = await fetch(url, {
+        credentials: "same-origin",
+        ...options
+    });
+
+    if (response.status === 401) {
+        window.location.href = "/admin/login.html";
+        throw new Error("Admin login required.");
+    }
+
+    return response;
+}
+
 async function checkLogin() {
-
-    const response = await fetch(`${API}/check-login`);
-
+    const response = await apiFetch(`${API}/check-login`);
     const result = await response.json();
 
     if (!result.loggedIn) {
@@ -26,10 +40,11 @@ async function checkLogin() {
 }
 
 async function loadStats() {
+    const response = await apiFetch(`${API}/stats`);
 
-    const response = await fetch(`${API}/stats`);
-
-    if (!response.ok) return;
+    if (!response.ok) {
+        throw new Error("Unable to load statistics.");
+    }
 
     const stats = await response.json();
 
@@ -50,16 +65,13 @@ async function loadStats() {
 }
 
 async function loadBookings() {
+    const response = await apiFetch(`${API}/bookings`);
 
-    const response = await fetch(`${API}/bookings`);
-
-    if (response.status === 401) {
-        window.location.href = "/admin/login.html";
-        return;
+    if (!response.ok) {
+        throw new Error("Unable to load bookings.");
     }
 
     const bookings = await response.json();
-
     const table = document.getElementById("bookingTable");
 
     table.innerHTML = "";
@@ -71,27 +83,18 @@ async function loadBookings() {
     }
 
     bookings.forEach(booking => {
-
         const row = document.createElement("tr");
 
         row.innerHTML = `
-            <td>${booking.id}</td>
-
+            <td>${escapeHTML(booking.id)}</td>
             <td>${escapeHTML(booking.name)}</td>
-
             <td>${escapeHTML(booking.email)}</td>
-
             <td>${escapeHTML(booking.destination)}</td>
-
             <td>${escapeHTML(booking.hotel_name)}</td>
-
             <td>₹${Number(booking.hotel_price).toLocaleString("en-IN")}</td>
-
-            <td>${booking.nights}</td>
-
+            <td>${escapeHTML(booking.nights)}</td>
             <td>₹${Number(booking.amount).toLocaleString("en-IN")}</td>
 
-           
             <td>
                 <select id="status-${booking.id}">
                     <option value="Pending" ${booking.status === "Pending" ? "selected" : ""}>Pending</option>
@@ -101,22 +104,30 @@ async function loadBookings() {
             </td>
 
             <td>
-                <button onclick="saveBooking(${booking.id})">Save</button>
+                <select id="payment-${booking.id}">
+                    <option value="Pending" ${booking.payment_status === "Pending" ? "selected" : ""}>Pending</option>
+                    <option value="Paid" ${booking.payment_status === "Paid" ? "selected" : ""}>Paid</option>
+                    <option value="Failed" ${booking.payment_status === "Failed" ? "selected" : ""}>Failed</option>
+                </select>
+            </td>
+
+            <td>
+                <button onclick="saveBooking(${Number(booking.id)})">
+                    Save
+                </button>
 
                 <button class="delete"
-                    onclick="deleteBooking(${booking.id})">
+                    onclick="deleteBooking(${Number(booking.id)})">
                     Delete
                 </button>
             </td>
         `;
 
         table.appendChild(row);
-
     });
 }
 
 async function saveBooking(id) {
-
     const payment_status =
         document.getElementById(`payment-${id}`).value;
 
@@ -124,8 +135,7 @@ async function saveBooking(id) {
         document.getElementById(`status-${id}`).value;
 
     try {
-
-        const paymentResponse = await fetch(
+        const paymentResponse = await apiFetch(
             `${API}/bookings/${id}/payment`,
             {
                 method: "PATCH",
@@ -136,11 +146,15 @@ async function saveBooking(id) {
             }
         );
 
+        const paymentResult = await paymentResponse.json();
+
         if (!paymentResponse.ok) {
-            throw new Error("Payment update failed");
+            throw new Error(
+                paymentResult.message || "Payment update failed."
+            );
         }
 
-        const statusResponse = await fetch(
+        const statusResponse = await apiFetch(
             `${API}/bookings/${id}/status`,
             {
                 method: "PATCH",
@@ -151,12 +165,15 @@ async function saveBooking(id) {
             }
         );
 
+        const statusResult = await statusResponse.json();
+
         if (!statusResponse.ok) {
-            throw new Error("Booking status update failed");
+            throw new Error(
+                statusResult.message || "Booking status update failed."
+            );
         }
 
         showMessage("Booking updated successfully!");
-
         await refreshDashboard();
 
     } catch (error) {
@@ -165,14 +182,12 @@ async function saveBooking(id) {
 }
 
 async function deleteBooking(id) {
-
     if (!confirm("Do you want to delete this booking?")) {
         return;
     }
 
     try {
-
-        const response = await fetch(
+        const response = await apiFetch(
             `${API}/bookings/${id}`,
             { method: "DELETE" }
         );
@@ -180,11 +195,10 @@ async function deleteBooking(id) {
         const result = await response.json();
 
         if (!response.ok) {
-            throw new Error(result.message);
+            throw new Error(result.message || "Delete failed.");
         }
 
         showMessage("Booking deleted successfully!");
-
         await refreshDashboard();
 
     } catch (error) {
@@ -193,16 +207,21 @@ async function deleteBooking(id) {
 }
 
 async function logout() {
-
-    await fetch(`${API}/logout`, {
-        method: "POST"
-    });
-
-    window.location.href = "/admin/login.html";
+    try {
+        await apiFetch(`${API}/logout`, {
+            method: "POST"
+        });
+    } finally {
+        window.location.href = "/admin/login.html";
+    }
 }
 
 function showMessage(message) {
-    document.getElementById("message").textContent = message;
+    const element = document.getElementById("message");
+
+    if (element) {
+        element.textContent = message;
+    }
 }
 
 async function refreshDashboard() {
@@ -211,16 +230,14 @@ async function refreshDashboard() {
 }
 
 async function startDashboard() {
-
     try {
         const loggedIn = await checkLogin();
 
         if (loggedIn) {
             await refreshDashboard();
         }
-
     } catch (error) {
-        showMessage("Unable to connect to server");
+        showMessage(error.message);
     }
 }
 

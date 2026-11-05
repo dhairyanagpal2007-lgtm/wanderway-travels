@@ -440,28 +440,22 @@ function checkHotelImages(hotels) {
 }
 
 // ================================================
-// 15. INITIALIZE SQLITE HOTEL TABLE
+// 15. INITIALIZE POSTGRESQL HOTEL TABLE
 // ================================================
 
-function initializeDestinationHotels(db) {
+async function initializeDestinationHotels(pool) {
 
-    if (
-        !db ||
-        typeof db.exec !== "function" ||
-        typeof db.prepare !== "function"
-    ) {
-        throw new Error(
-            "A valid SQLite DatabaseSync connection is required."
-        );
+    if (!pool || typeof pool.query !== "function") {
+        throw new Error("A valid PostgreSQL connection is required.");
     }
 
-    db.exec(`
+    await pool.query(`
         CREATE TABLE IF NOT EXISTS destination_hotels (
             id TEXT PRIMARY KEY,
             destination TEXT NOT NULL,
             region_type TEXT NOT NULL,
             hotel_name TEXT NOT NULL,
-            price_per_night REAL NOT NULL,
+            price_per_night DOUBLE PRECISION NOT NULL,
             description TEXT DEFAULT '',
             image_url TEXT DEFAULT '',
             gallery_images TEXT DEFAULT '[]',
@@ -470,98 +464,31 @@ function initializeDestinationHotels(db) {
         )
     `);
 
-    const tableInfo = db.prepare(
-        "PRAGMA table_info(destination_hotels)"
-    ).all();
-
-    const existingColumns = new Set(
-        tableInfo.map(column => column.name)
-    );
-
-    const requiredColumns = [
-        ["id", "TEXT"],
-        ["destination", "TEXT DEFAULT ''"],
-        ["region_type", "TEXT DEFAULT ''"],
-        ["hotel_name", "TEXT DEFAULT ''"],
-        ["price_per_night", "REAL DEFAULT 0"],
-        ["description", "TEXT DEFAULT ''"],
-        ["image_url", "TEXT DEFAULT ''"],
-        ["gallery_images", "TEXT DEFAULT '[]'"],
-        ["facilities", "TEXT DEFAULT '[]'"],
-        ["fallback_image_url", "TEXT DEFAULT ''"]
-    ];
-
-    for (const [column, definition] of requiredColumns) {
-
-        if (!existingColumns.has(column)) {
-
-            db.exec(
-                "ALTER TABLE destination_hotels ADD COLUMN " +
-                column + " " + definition
-            );
-
-            console.log("Added column:", column);
-        }
-    }
-
-    const updatedInfo = db.prepare(
-        "PRAGMA table_info(destination_hotels)"
-    ).all();
-
-    const idColumn = updatedInfo.find(
-        column => column.name === "id"
-    );
-
-    const idIsInteger =
-        idColumn &&
-        String(idColumn.type).toUpperCase().includes("INT");
-
-    const insertStatement = idIsInteger
-        ? db.prepare(`
-            INSERT INTO destination_hotels (
-                destination,
-                region_type,
-                hotel_name,
-                price_per_night,
-                description,
-                image_url,
-                gallery_images,
-                facilities,
-                fallback_image_url
-            )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `)
-        : db.prepare(`
-            INSERT INTO destination_hotels (
-                id,
-                destination,
-                region_type,
-                hotel_name,
-                price_per_night,
-                description,
-                image_url,
-                gallery_images,
-                facilities,
-                fallback_image_url
-            )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `);
-
-    let transactionStarted = false;
+    const client = await pool.connect();
 
     try {
+        await client.query("BEGIN");
 
-        db.exec("BEGIN TRANSACTION");
-        transactionStarted = true;
-
-        // Replaces only the generated hotel catalogue.
-        // Customer bookings are not deleted.
-
-        db.exec("DELETE FROM destination_hotels");
+        await client.query("TRUNCATE TABLE destination_hotels");
 
         for (const hotel of hotelCatalogue) {
 
-            const values = [
+            await client.query(`
+                INSERT INTO destination_hotels (
+                    id,
+                    destination,
+                    region_type,
+                    hotel_name,
+                    price_per_night,
+                    description,
+                    image_url,
+                    gallery_images,
+                    facilities,
+                    fallback_image_url
+                )
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+            `, [
+                hotel.id,
                 hotel.destination,
                 hotel.region_type,
                 hotel.hotel_name,
@@ -571,17 +498,10 @@ function initializeDestinationHotels(db) {
                 JSON.stringify(hotel.gallery_images),
                 JSON.stringify(hotel.facilities),
                 hotel.fallback_image_url
-            ];
-
-            if (idIsInteger) {
-                insertStatement.run(...values);
-            } else {
-                insertStatement.run(hotel.id, ...values);
-            }
+            ]);
         }
 
-        db.exec("COMMIT");
-        transactionStarted = false;
+        await client.query("COMMIT");
 
         checkHotelImages(hotelCatalogue);
 
@@ -590,27 +510,16 @@ function initializeDestinationHotels(db) {
         console.log("Destinations:", totalDestinations);
         console.log("Hotels per destination:", HOTELS_PER_DESTINATION);
         console.log("Total hotels:", hotelCatalogue.length);
-        console.log("State hotels:", stateHotels.length);
-        console.log("Union Territory hotels:", unionTerritoryHotels.length);
-        console.log("International hotels:", internationalHotels.length);
         console.log("==================================");
 
     } catch (error) {
 
-        if (transactionStarted) {
-            try {
-                db.exec("ROLLBACK");
-            } catch (rollbackError) {
-                console.error("Rollback error:", rollbackError);
-            }
-        }
-
-        console.error(
-            "Destination hotel initialization error:",
-            error
-        );
-
+        await client.query("ROLLBACK");
+        console.error("Hotel catalogue initialization failed:", error);
         throw error;
+
+    } finally {
+        client.release();
     }
 }
 
