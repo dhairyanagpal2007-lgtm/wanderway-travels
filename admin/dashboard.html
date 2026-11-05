@@ -1,0 +1,181 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>WanderWay Admin Dashboard</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #f4f6f9;
+            padding: 25px;
+            margin: 0;
+        }
+
+        .dashboard {
+            max-width: 1500px;
+            margin: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px #0001;
+        }
+
+        .card p {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .table-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            min-width: 1200px;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background: #102a43;
+            color: white;
+        }
+
+        select, button {
+            padding: 8px;
+            margin: 3px;
+            cursor: pointer;
+        }
+
+        button {
+            border: none;
+            border-radius: 4px;
+            background: #087f8c;
+            color: white;
+        }
+
+        .delete {
+            background: #dc3545;
+        }
+
+        #message {
+            margin: 15px 0;
+        }
+
+        @media(max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="dashboard">
+
+    <div class="header">
+        <div>
+            <h1>WanderWay Travels</h1>
+            <p>Admin Dashboard</p>
+        </div>
+
+        <button onclick="logout()">Logout</button>
+    </div>
+
+    <div class="stats">
+
+        <div class="card">
+            <h3>Total Bookings</h3>
+            <p id="totalBookings">0</p>
+        </div>
+
+        <div class="card">
+            <h3>Pending</h3>
+            <p id="pendingBookings">0</p>
+        </div>
+
+        <div class="card">
+            <h3>Confirmed</h3>
+            <p id="confirmedBookings">0</p>
+        </div>
+
+        <div class="card">
+            <h3>Cancelled</h3>
+            <p id="cancelledBookings">0</p>
+        </div>
+
+        <div class="card">
+            <h3>Total Paid</h3>
+            <p id="paidAmount">₹0</p>
+        </div>
+
+    </div>
+
+    <div class="table-container">
+
+        <h2>Booking Management</h2>
+
+        <p id="message"></p>
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Customer</th>
+                    <th>Email</th>
+                    <th>Destination</th>
+                    <th>Hotel Name</th>
+                    <th>Price/Night</th>
+                    <th>Nights</th>
+                    <th>Amount</th>
+                    <th>Booking Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody id="bookingTable">
+                <tr>
+                    <td colspan="11">Loading...</td>
+                </tr>
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+<script src="/admin/admin.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,342 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <meta name="description"
+          content="WanderWay Travels - Explore destinations and discover hotel accommodation across India and around the world.">
+
+    <meta name="theme-color" content="#123b5d">
+
+    <title>WanderWay Travels | Explore the World</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- =====================================
+         1. NAVIGATION BAR
+    ====================================== -->
+
+    <header class="navbar">
+
+        <h2>
+            WanderWay Travels
+        </h2>
+
+        <nav aria-label="Main navigation">
+
+            <a href="#home">Home</a>
+
+            <a href="#hotels">Hotels</a>
+
+            <a href="#booking">Booking</a>
+
+            <a href="/admin/login.html">Admin</a>
+
+        </nav>
+
+    </header>
+
+
+    <!-- =====================================
+         2. HERO SECTION
+    ====================================== -->
+
+    <section class="hero" id="home">
+
+        <div>
+
+            <h1>
+                Explore The World With Us
+            </h1>
+
+            <p>
+                Discover amazing destinations and comfortable hotels.
+            </p>
+
+            <a href="#hotels" class="btn">
+                Explore Hotels
+            </a>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================
+         3. HOTEL SECTION
+    ====================================== -->
+
+    <section class="section" id="hotels">
+
+        <h2>
+            Explore Our Destinations
+        </h2>
+
+        <p class="hotel-intro">
+            Choose from destinations across India and around the world.
+            Discover available hotel listings and explore their details.
+        </p>
+
+        <!-- Hotel cards are loaded using script.js -->
+
+        <div
+            class="hotel-container"
+            id="popularHotels"
+            aria-live="polite"
+        >
+
+            <p>
+                Loading popular hotels...
+            </p>
+
+        </div>
+
+        <!-- Hotel count -->
+
+        <p
+            id="hotelCount"
+            class="hotel-count"
+            aria-live="polite"
+        >
+            Loading hotel information...
+        </p>
+
+    </section>
+
+
+    <!-- =====================================
+         4. BOOKING SECTION
+    ====================================== -->
+
+    <section class="section booking-section" id="booking">
+
+        <h2>
+            Book Your Hotel
+        </h2>
+
+        <form id="bookingForm">
+
+            <!-- CUSTOMER NAME -->
+
+            <label for="customerName">
+                Full Name
+            </label>
+
+            <input
+                type="text"
+                id="customerName"
+                name="name"
+                placeholder="Enter your full name"
+                autocomplete="name"
+                required
+            >
+
+
+            <!-- CUSTOMER EMAIL -->
+
+            <label for="customerEmail">
+                Email Address
+            </label>
+
+            <input
+                type="email"
+                id="customerEmail"
+                name="email"
+                placeholder="Enter your email address"
+                autocomplete="email"
+                required
+            >
+
+
+            <!-- DESTINATION -->
+
+            <label for="destination">
+                Select Destination
+            </label>
+
+            <select
+                name="destination"
+                id="destination"
+                required
+            >
+
+                <option value="">
+                    Loading destinations...
+                </option>
+
+            </select>
+
+
+            <!-- HOTEL -->
+
+            <label for="hotel_name">
+                Select Hotel
+            </label>
+
+            <select
+                name="hotel_name"
+                id="hotel_name"
+                required
+                disabled
+            >
+
+                <option value="">
+                    First select a destination
+                </option>
+
+            </select>
+
+
+            <!-- NUMBER OF NIGHTS -->
+
+            <label for="nights">
+                Number of Nights
+            </label>
+
+            <input
+                type="number"
+                name="nights"
+                id="nights"
+                value="1"
+                min="1"
+                max="365"
+                step="1"
+                required
+            >
+
+
+            <!-- =====================================
+                 PRICE CALCULATION
+            ====================================== -->
+
+            <div class="price-box">
+
+                <h3>
+                    Booking Price Summary
+                </h3>
+
+                <div class="price-row">
+
+                    <span>
+                        Price per Night:
+                    </span>
+
+                    <strong id="hotelPrice">
+                        ₹0
+                    </strong>
+
+                </div>
+
+                <div class="price-row">
+
+                    <span>
+                        Number of Nights:
+                    </span>
+
+                    <strong id="displayNights">
+                        1
+                    </strong>
+
+                </div>
+
+                <hr>
+
+                <div class="price-row total-price-row">
+
+                    <h3>
+                        Total Amount:
+                    </h3>
+
+                    <span
+                        id="totalPrice"
+                        aria-live="polite"
+                    >
+                        ₹0
+                    </span>
+
+                </div>
+
+                <p class="price-note">
+                    Total amount is calculated automatically
+                    according to the selected hotel and number of nights.
+                </p>
+
+            </div>
+
+
+            <!-- CUSTOMER MESSAGE -->
+
+            <label for="bookingMessageInput">
+                Message (Optional)
+            </label>
+
+            <textarea
+                name="message"
+                id="bookingMessageInput"
+                rows="4"
+                placeholder="Enter any special request..."
+            ></textarea>
+
+
+            <!-- BOOKING BUTTON -->
+
+            <button
+                type="submit"
+                class="btn"
+                id="bookingButton"
+            >
+                Submit Booking
+            </button>
+
+
+            <!-- BOOKING RESPONSE -->
+
+            <p
+                id="bookingMessage"
+                role="status"
+                aria-live="polite"
+            ></p>
+
+        </form>
+
+    </section>
+
+
+    <!-- =====================================
+         5. FOOTER
+    ====================================== -->
+
+    <footer>
+
+        <h3>
+            WanderWay Travels
+        </h3>
+
+        <p>
+            Explore more. Travel better.
+        </p>
+
+        <p>
+            © 2026 WanderWay Travels
+        </p>
+
+    </footer>
+
+
+    <!-- =====================================
+         6. JAVASCRIPT
+    ====================================== -->
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>

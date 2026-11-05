@@ -1,0 +1,20 @@
+
+{
+  "name": "wanderway-travels",
+  "version": "1.0.0",
+  "description": "Hotel and travel booking website",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=22.5.0 <25"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "express-session": "^1.18.1"
+  }
+}
