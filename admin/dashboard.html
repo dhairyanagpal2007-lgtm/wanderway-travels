@@ -45,17 +45,30 @@
             font-weight: bold;
         }
 
+        .payment-card {
+            border-left: 5px solid #087f8c;
+        }
+
+        .payment-card p {
+            color: #087f8c;
+        }
+
         .table-container {
             background: white;
             padding: 20px;
             border-radius: 10px;
             overflow-x: auto;
+            margin-bottom: 25px;
         }
 
         table {
             width: 100%;
             min-width: 1200px;
             border-collapse: collapse;
+        }
+
+        .guest-table {
+            min-width: 700px;
         }
 
         th, td {
@@ -111,6 +124,8 @@
         <button onclick="logout()">Logout</button>
     </div>
 
+    <!-- DASHBOARD STATISTICS -->
+
     <div class="stats">
 
         <div class="card">
@@ -133,7 +148,16 @@
             <p id="cancelledBookings">0</p>
         </div>
 
+        <!-- NEW TOTAL PAYMENT CARD -->
+
+        <div class="card payment-card">
+            <h3>Total Booking Amount</h3>
+            <p id="totalPayment">₹0</p>
+        </div>
+
     </div>
+
+    <!-- BOOKING MANAGEMENT -->
 
     <div class="table-container">
 
@@ -161,6 +185,36 @@
             <tbody id="bookingTable">
                 <tr>
                     <td colspan="10">Loading...</td>
+                </tr>
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <!-- NEW GUEST AND ROOM DETAILS SECTION -->
+
+    <div class="table-container">
+
+        <h2>Guest & Room Details</h2>
+
+        <p>View the number of rooms and guest details for every booking.</p>
+
+        <table class="guest-table">
+
+            <thead>
+                <tr>
+                    <th>Booking ID</th>
+                    <th>Customer Name</th>
+                    <th>Number of Rooms</th>
+                    <th>Total Guests</th>
+                    <th>Guest Details</th>
+                </tr>
+            </thead>
+
+            <tbody id="guestRoomTable">
+                <tr>
+                    <td colspan="5">Loading guest details...</td>
                 </tr>
             </tbody>
 

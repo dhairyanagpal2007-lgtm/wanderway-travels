@@ -11,9 +11,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     const hotelSelect = document.getElementById("hotel_name");
     const nightsInput = document.getElementById("nights");
 
+    const checkInInput = document.getElementById("check_in_date");
+    const checkOutInput = document.getElementById("check_out_date");
+
     const hotelPriceInput = document.getElementById("hotelPrice");
     const totalPriceInput = document.getElementById("totalPrice");
     const displayNights = document.getElementById("displayNights");
+
+    const roomCountInput = document.getElementById("roomCount");
+    const displayRooms = document.getElementById("displayRooms");
 
     const bookingMessage = document.getElementById("bookingMessage");
     const bookingButton = document.getElementById("bookingButton");
@@ -35,6 +41,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     // ==========================================
     // 2. GENERAL HELPER FUNCTIONS
     // ==========================================
+
+    function getRoomCount() {
+        const count = Number(roomCountInput?.value) || 1;
+        return Math.max(1, Math.min(count, 10));
+    }
 
     function parseArray(value) {
         if (Array.isArray(value)) return value;
@@ -60,10 +71,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     function getDestinationNames(data) {
         const names = [
-            ...(Array.isArray(data.states) ? data.states : []),
-            ...(Array.isArray(data.unionTerritories)
+            ...(Array.isArray(data?.states) ? data.states : []),
+            ...(Array.isArray(data?.unionTerritories)
                 ? data.unionTerritories : []),
-            ...(Array.isArray(data.international)
+            ...(Array.isArray(data?.international)
                 ? data.international : [])
         ];
 
@@ -98,8 +109,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     function getHotelDescription(hotel) {
-        return hotel?.description ||
-            `Explore ${getHotelName(hotel)} in ${getHotelDestination(hotel)}.`;
+        const description = hotel?.description;
+
+        if (description) return description;
+
+        return "Explore " +
+            getHotelName(hotel) +
+            " in " +
+            getHotelDestination(hotel) +
+            ".";
     }
 
     function formatPrice(price) {
@@ -135,8 +153,176 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     // ==========================================
+    // 2A. CHECK-IN / CHECK-OUT DATE FUNCTIONS
+    // ==========================================
+
+    function getTodayDateString() {
+        const today = new Date();
+
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, "0");
+        const day = String(today.getDate()).padStart(2, "0");
+
+        return year + "-" + month + "-" + day;
+    }
+
+    function getNextDateString(dateString) {
+        const date = new Date(dateString + "T00:00:00Z");
+
+        date.setUTCDate(date.getUTCDate() + 1);
+
+        return date.toISOString().slice(0, 10);
+    }
+
+    function isValidDateString(value) {
+        if (
+            typeof value !== "string" ||
+            !/^\d{4}-\d{2}-\d{2}$/.test(value)
+        ) {
+            return false;
+        }
+
+        const date = new Date(value + "T00:00:00Z");
+
+        return (
+            !Number.isNaN(date.getTime()) &&
+            date.toISOString().slice(0, 10) === value
+        );
+    }
+
+    function calculateNights(checkIn, checkOut) {
+        if (
+            !isValidDateString(checkIn) ||
+            !isValidDateString(checkOut)
+        ) {
+            return 0;
+        }
+
+        const start = new Date(checkIn + "T00:00:00Z");
+        const end = new Date(checkOut + "T00:00:00Z");
+
+        return Math.round(
+            (end - start) / (1000 * 60 * 60 * 24)
+        );
+    }
+
+    function updateDateMinimums() {
+        if (!checkInInput || !checkOutInput) return;
+
+        const today = getTodayDateString();
+
+        checkInInput.min = today;
+
+        checkOutInput.disabled = !checkInInput.value;
+
+        if (checkInInput.value) {
+            const minimumCheckout =
+                getNextDateString(checkInInput.value);
+
+            checkOutInput.min = minimumCheckout;
+
+            if (
+                checkOutInput.value &&
+                checkOutInput.value < minimumCheckout
+            ) {
+                checkOutInput.value = "";
+            }
+        } else {
+            checkOutInput.min = getNextDateString(today);
+            checkOutInput.value = "";
+        }
+    }
+
+    function updateNightsFromDates() {
+        if (!checkInInput || !checkOutInput || !nightsInput) {
+            return false;
+        }
+
+        const checkIn = checkInInput.value;
+        const checkOut = checkOutInput.value;
+
+        if (!checkIn || !checkOut) {
+            return false;
+        }
+
+        const nights = calculateNights(checkIn, checkOut);
+
+        if (nights < 1 || nights > 365) {
+            return false;
+        }
+
+        nightsInput.value = String(nights);
+
+        if (displayNights) {
+            displayNights.textContent = String(nights);
+        }
+
+        return true;
+    }
+
+    function validateBookingDates() {
+        if (!checkInInput || !checkOutInput) {
+            return {
+                valid: false,
+                message: "Check-in and check-out date fields are missing."
+            };
+        }
+
+        const checkIn = checkInInput.value;
+        const checkOut = checkOutInput.value;
+
+        if (!checkIn || !checkOut) {
+            return {
+                valid: false,
+                message: "Please select both check-in and check-out dates."
+            };
+        }
+
+        if (
+            !isValidDateString(checkIn) ||
+            !isValidDateString(checkOut)
+        ) {
+            return {
+                valid: false,
+                message: "Please enter valid dates."
+            };
+        }
+
+        const today = getTodayDateString();
+
+        if (checkIn < today) {
+            return {
+                valid: false,
+                message: "Check-in date cannot be in the past."
+            };
+        }
+
+        const nights = calculateNights(checkIn, checkOut);
+
+        if (nights < 1) {
+            return {
+                valid: false,
+                message: "Check-out date must be after check-in date."
+            };
+        }
+
+        if (nights > 365) {
+            return {
+                valid: false,
+                message: "Maximum stay is 365 nights."
+            };
+        }
+
+        return {
+            valid: true,
+            nights,
+            checkIn,
+            checkOut
+        };
+    }
+
+    // ==========================================
     // 3. HOTEL IMAGE FUNCTIONS
-    // IMPORTANT: USE BACKEND IMAGE DATA
     // ==========================================
 
     function isValidImageURL(url) {
@@ -160,20 +346,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     function getHotelImages(hotel) {
         if (!hotel) return [];
 
-        // Read images directly from destinations.js through the API.
         const mainImage = hotel.image_url || "";
-
         const galleryImages = parseArray(hotel.gallery_images);
 
-        const images = [
-            mainImage,
-            ...galleryImages
-        ];
+        const images = [mainImage, ...galleryImages];
 
-        // Remove empty and duplicate image URLs.
-        return [...new Set(
-            images.filter(isValidImageURL)
-        )];
+        return [...new Set(images.filter(isValidImageURL))];
     }
 
     function getHotelFallbackImage(hotel) {
@@ -614,7 +792,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         const images = getHotelImages(hotel);
-
         const mainImage =
             document.getElementById("previewHotelMainImage");
 
@@ -630,7 +807,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             getHotelDescription(hotel);
 
         document.getElementById("previewHotelPrice").textContent =
-            `₹${formatPrice(getHotelPrice(hotel))} per night`;
+            "₹" + formatPrice(getHotelPrice(hotel)) + " per night";
 
         const gallery =
             document.getElementById("previewHotelGallery");
@@ -640,7 +817,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         images.forEach((imageURL, index) => {
             const thumbnail = document.createElement("img");
 
-            thumbnail.alt = `Hotel photograph ${index + 1}`;
+            thumbnail.alt = "Hotel photograph " + (index + 1);
             thumbnail.loading = "lazy";
 
             setHotelGalleryImage(thumbnail, hotel, imageURL);
@@ -733,8 +910,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         try {
             const url =
-                `/api/hotels?destination=${encodeURIComponent(destination)}` +
-                `&limit=${MAX_HOTELS_PER_DESTINATION}`;
+                "/api/hotels?destination=" +
+                encodeURIComponent(destination) +
+                "&limit=" + MAX_HOTELS_PER_DESTINATION;
 
             const data = await fetchJSON(url);
             const hotels = getHotelArray(data);
@@ -753,8 +931,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                 option.value = name;
 
                 option.textContent = price > 0
-                    ? `${name} - ₹${formatPrice(price)} / night`
-                    : `${name} - Price unavailable`;
+                    ? name + " - ₹" + formatPrice(price) + " / night"
+                    : name + " - Price unavailable";
 
                 option.dataset.price = String(price);
 
@@ -765,7 +943,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             if (hotelCount) {
                 hotelCount.textContent =
-                    `${hotels.length} hotels available in ${destination}`;
+                    hotels.length + " hotels available in " + destination;
             }
 
             if (hotels.length === 0) {
@@ -803,6 +981,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         const selectedOption =
             hotelSelect.options[hotelSelect.selectedIndex];
 
+        const rooms = getRoomCount();
+
+        if (displayRooms) {
+            displayRooms.textContent = String(rooms);
+        }
+
         if (!selectedOption || !selectedOption.value) {
             selectedHotelPrice = 0;
             setDisplayedPrices("₹0", "₹0");
@@ -838,11 +1022,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         nights = Math.min(nights, 365);
 
-        const totalAmount = selectedHotelPrice * nights;
+        const totalAmount = selectedHotelPrice * nights * rooms;
 
         setDisplayedPrices(
-            `₹${formatPrice(selectedHotelPrice)}`,
-            `₹${formatPrice(totalAmount)}`
+            "₹" + formatPrice(selectedHotelPrice),
+            "₹" + formatPrice(totalAmount)
         );
 
         if (displayNights) {
@@ -871,10 +1055,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             getHotelDescription(hotel);
 
         document.getElementById("modalPrice").textContent =
-            `₹${formatPrice(getHotelPrice(hotel))} per night`;
+            "₹" + formatPrice(getHotelPrice(hotel)) + " per night";
 
         const images = getHotelImages(hotel);
-
         const mainImage =
             document.getElementById("modalMainImage");
 
@@ -886,7 +1069,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         images.forEach((imageURL, index) => {
             const thumbnail = document.createElement("img");
 
-            thumbnail.alt = `Hotel gallery image ${index + 1}`;
+            thumbnail.alt = "Hotel gallery image " + (index + 1);
             thumbnail.loading = "lazy";
 
             setHotelGalleryImage(thumbnail, hotel, imageURL);
@@ -964,7 +1147,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         const image = document.createElement("img");
 
-        image.alt = `${getHotelName(hotel)} hotel photograph`;
+        image.alt = getHotelName(hotel) + " hotel photograph";
         image.loading = "lazy";
 
         const hotelImages = getHotelImages(hotel);
@@ -979,7 +1162,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         const price = document.createElement("h4");
         price.textContent =
-            `₹${formatPrice(getHotelPrice(hotel))} / night`;
+            "₹" + formatPrice(getHotelPrice(hotel)) + " / night";
 
         const facilities = document.createElement("p");
         facilities.className = "hotel-facility-preview";
@@ -1039,7 +1222,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         if (hotelCount) {
             hotelCount.textContent =
-                `${allPopularHotels.length} sample hotels loaded`;
+                allPopularHotels.length + " sample hotels loaded";
         }
 
         document.getElementById("showMoreHotels")?.remove();
@@ -1085,8 +1268,9 @@ document.addEventListener("DOMContentLoaded", async () => {
                     group.map(async destination => {
                         try {
                             const url =
-                                `/api/hotels?destination=${encodeURIComponent(destination)}` +
-                                `&limit=${HOTELS_PER_DESTINATION}`;
+                                "/api/hotels?destination=" +
+                                encodeURIComponent(destination) +
+                                "&limit=" + HOTELS_PER_DESTINATION;
 
                             const data = await fetchJSON(url);
 
@@ -1094,7 +1278,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
                         } catch (error) {
                             console.error(
-                                `Unable to load hotels for ${destination}:`,
+                                "Unable to load hotels for " + destination + ":",
                                 error
                             );
 
@@ -1112,7 +1296,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             displayPopularHotels();
 
             console.log(
-                `${allPopularHotels.length} sample hotels loaded successfully.`
+                allPopularHotels.length + " sample hotels loaded successfully."
             );
 
         } catch (error) {
@@ -1155,21 +1339,64 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     // ==========================================
-    // 18. NUMBER OF NIGHTS CHANGE
+    // 18. CHECK-IN AND CHECK-OUT CHANGE
+    // ==========================================
+
+    if (checkInInput) {
+        checkInInput.addEventListener("change", () => {
+            updateDateMinimums();
+            updateNightsFromDates();
+            updatePrice();
+        });
+    }
+
+    if (checkOutInput) {
+        checkOutInput.addEventListener("change", () => {
+            updateNightsFromDates();
+            updatePrice();
+        });
+    }
+
+    // ==========================================
+    // 19. NIGHTS AND ROOMS CHANGE
     // ==========================================
 
     if (nightsInput) {
+        nightsInput.readOnly = true;
+
         nightsInput.addEventListener("input", updatePrice);
         nightsInput.addEventListener("change", updatePrice);
     }
 
+    if (roomCountInput) {
+        roomCountInput.addEventListener("input", updatePrice);
+        roomCountInput.addEventListener("change", updatePrice);
+    }
+
     // ==========================================
-    // 19. BOOKING FORM SUBMISSION
+    // 20. BOOKING FORM SUBMISSION
     // ==========================================
 
     if (bookingForm) {
         bookingForm.addEventListener("submit", async event => {
             event.preventDefault();
+
+            const dateValidation = validateBookingDates();
+
+            if (!dateValidation.valid) {
+                if (bookingMessage) {
+                    bookingMessage.textContent = dateValidation.message;
+                    bookingMessage.style.color = "red";
+                }
+
+                return;
+            }
+
+            const nights = dateValidation.nights;
+
+            if (nightsInput) {
+                nightsInput.value = String(nights);
+            }
 
             updatePrice();
 
@@ -1184,16 +1411,101 @@ document.addEventListener("DOMContentLoaded", async () => {
                 return;
             }
 
-            const nights = Number(nightsInput?.value);
+            const numberOfRooms = Number(roomCountInput?.value);
 
             if (
-                !Number.isInteger(nights) ||
-                nights < 1 ||
-                nights > 365
+                !Number.isInteger(numberOfRooms) ||
+                numberOfRooms < 1 ||
+                numberOfRooms > 10
             ) {
                 if (bookingMessage) {
                     bookingMessage.textContent =
-                        "Please enter between 1 and 365 nights.";
+                        "Please select between 1 and 10 rooms.";
+
+                    bookingMessage.style.color = "red";
+                }
+
+                return;
+            }
+
+            let rooms = [];
+
+            try {
+                if (typeof window.getBookingRooms !== "function") {
+                    throw new Error(
+                        "Room and guest fields are unavailable. Please refresh the page."
+                    );
+                }
+
+                rooms = window.getBookingRooms();
+
+                if (
+                    !Array.isArray(rooms) ||
+                    rooms.length !== numberOfRooms
+                ) {
+                    throw new Error(
+                        "Please check your room and guest selections."
+                    );
+                }
+
+                for (let i = 0; i < rooms.length; i++) {
+                    const guests = rooms[i]?.guests;
+
+                    if (
+                        !Array.isArray(guests) ||
+                        guests.length < 1 ||
+                        guests.length > 5
+                    ) {
+                        throw new Error(
+                            "Room " + (i + 1) +
+                            " must have between 1 and 5 guests."
+                        );
+                    }
+
+                    for (let j = 0; j < guests.length; j++) {
+                        const guestName =
+                            String(guests[j]?.name || "").trim();
+
+                        if (!guestName) {
+                            throw new Error(
+                                "Please enter the name of guest " +
+                                (j + 1) + " in Room " + (i + 1) + "."
+                            );
+                        }
+
+                        guests[j].name = guestName;
+
+                        const ageValue = guests[j].age;
+
+                        if (
+                            ageValue !== "" &&
+                            ageValue !== null &&
+                            ageValue !== undefined
+                        ) {
+                            const age = Number(ageValue);
+
+                            if (
+                                !Number.isInteger(age) ||
+                                age < 0 ||
+                                age > 120
+                            ) {
+                                throw new Error(
+                                    "Please enter a valid age for guest " +
+                                    (j + 1) + " in Room " + (i + 1) + "."
+                                );
+                            }
+
+                            guests[j].age = age;
+                        } else {
+                            guests[j].age = null;
+                        }
+                    }
+                }
+
+            } catch (error) {
+                if (bookingMessage) {
+                    bookingMessage.textContent =
+                        error.message || "Please check the guest details.";
 
                     bookingMessage.style.color = "red";
                 }
@@ -1218,7 +1530,12 @@ document.addEventListener("DOMContentLoaded", async () => {
                     email: formData.get("email"),
                     destination: formData.get("destination"),
                     hotel_name: formData.get("hotel_name"),
+
+                    check_in_date: dateValidation.checkIn,
+                    check_out_date: dateValidation.checkOut,
+
                     nights: nights,
+                    rooms: rooms,
                     message: formData.get("message") || ""
                 };
 
@@ -1243,6 +1560,20 @@ document.addEventListener("DOMContentLoaded", async () => {
 
                 bookingForm.reset();
 
+                updateDateMinimums();
+
+                if (nightsInput) {
+                    nightsInput.value = "1";
+                }
+
+                if (roomCountInput) {
+                    roomCountInput.value = "1";
+
+                    roomCountInput.dispatchEvent(
+                        new Event("change", { bubbles: true })
+                    );
+                }
+
                 if (hotelSelect) {
                     hotelSelect.innerHTML =
                         '<option value="">Select destination first</option>';
@@ -1260,6 +1591,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                     displayNights.textContent = "1";
                 }
 
+                if (displayRooms) {
+                    displayRooms.textContent = "1";
+                }
+
             } catch (error) {
                 console.error("Booking error:", error);
 
@@ -1273,14 +1608,14 @@ document.addEventListener("DOMContentLoaded", async () => {
             } finally {
                 if (bookingButton) {
                     bookingButton.disabled = false;
-                    bookingButton.textContent = "Book Now";
+                    bookingButton.textContent = "Submit Booking";
                 }
             }
         });
     }
 
     // ==========================================
-    // 20. INITIALIZE WEBSITE
+    // 21. INITIALIZE WEBSITE
     // ==========================================
 
     createHotelSelectionPreview();
@@ -1289,10 +1624,21 @@ document.addEventListener("DOMContentLoaded", async () => {
         hotelSelect.disabled = true;
     }
 
+    if (nightsInput) {
+        nightsInput.value = nightsInput.value || "1";
+        nightsInput.readOnly = true;
+    }
+
+    updateDateMinimums();
+
     setDisplayedPrices("₹0", "₹0");
 
     if (displayNights) {
         displayNights.textContent = nightsInput?.value || "1";
+    }
+
+    if (displayRooms) {
+        displayRooms.textContent = String(getRoomCount());
     }
 
     await loadDestinations();

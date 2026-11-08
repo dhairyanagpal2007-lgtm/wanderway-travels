@@ -1,134 +1,155 @@
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-    <meta name="description"
-          content="WanderWay Travels - Explore destinations and discover hotel accommodation across India and around the world.">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="WanderWay Travels - Explore destinations and discover hotel accommodation across India and around the world.">
     <meta name="theme-color" content="#123b5d">
 
     <title>WanderWay Travels | Explore the World</title>
 
     <link rel="stylesheet" href="style.css">
+
+    <style>
+        .room-card {
+            background: #f4f6f9;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .room-card h3 {
+            margin-top: 0;
+        }
+
+        .guest-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 12px 0;
+        }
+
+        .guest-card label,
+        .room-card label {
+            display: block;
+            margin-top: 10px;
+        }
+
+        .guest-card input,
+        .room-card select,
+        .room-card input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px;
+            margin-top: 5px;
+        }
+
+        .room-card select {
+            max-width: 250px;
+        }
+
+        .room-info,
+        .date-info,
+        .id-info {
+            color: #555;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .date-fields {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 15px;
+        }
+
+        .date-field {
+            min-width: 0;
+        }
+
+        .date-field label {
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .date-field input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px;
+        }
+
+        #nights[readonly] {
+            background: #f1f3f5;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 600px) {
+            .date-fields {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-    <!-- =====================================
-         1. NAVIGATION BAR
-    ====================================== -->
+    <!-- NAVIGATION -->
 
     <header class="navbar">
-
-        <h2>
-            WanderWay Travels
-        </h2>
+        <h2>WanderWay Travels</h2>
 
         <nav aria-label="Main navigation">
-
             <a href="#home">Home</a>
-
             <a href="#hotels">Hotels</a>
-
             <a href="#booking">Booking</a>
-
             <a href="/admin/login.html">Admin</a>
-
         </nav>
-
     </header>
 
-
-    <!-- =====================================
-         2. HERO SECTION
-    ====================================== -->
+    <!-- HERO SECTION -->
 
     <section class="hero" id="home">
-
         <div>
-
-            <h1>
-                Explore The World With Us
-            </h1>
-
-            <p>
-                Discover amazing destinations and comfortable hotels.
-            </p>
-
-            <a href="#hotels" class="btn">
-                Explore Hotels
-            </a>
-
+            <h1>Explore The World With Us</h1>
+            <p>Discover amazing destinations and comfortable hotels.</p>
+            <a href="#hotels" class="btn">Explore Hotels</a>
         </div>
-
     </section>
 
-
-    <!-- =====================================
-         3. HOTEL SECTION
-    ====================================== -->
+    <!-- HOTEL SECTION -->
 
     <section class="section" id="hotels">
 
-        <h2>
-            Explore Our Destinations
-        </h2>
+        <h2>Explore Our Destinations</h2>
 
         <p class="hotel-intro">
             Choose from destinations across India and around the world.
             Discover available hotel listings and explore their details.
         </p>
 
-        <!-- Hotel cards are loaded using script.js -->
-
-        <div
-            class="hotel-container"
-            id="popularHotels"
-            aria-live="polite"
-        >
-
-            <p>
-                Loading popular hotels...
-            </p>
-
+        <div class="hotel-container" id="popularHotels" aria-live="polite">
+            <p>Loading popular hotels...</p>
         </div>
 
-        <!-- Hotel count -->
-
-        <p
-            id="hotelCount"
-            class="hotel-count"
-            aria-live="polite"
-        >
+        <p id="hotelCount" class="hotel-count" aria-live="polite">
             Loading hotel information...
         </p>
 
     </section>
 
-
-    <!-- =====================================
-         4. BOOKING SECTION
-    ====================================== -->
+    <!-- BOOKING SECTION -->
 
     <section class="section booking-section" id="booking">
 
-        <h2>
-            Book Your Hotel
-        </h2>
+        <h2>Book Your Hotel</h2>
 
         <form id="bookingForm">
 
-            <!-- CUSTOMER NAME -->
+            <!-- CUSTOMER DETAILS -->
 
-            <label for="customerName">
-                Full Name
-            </label>
+            <label for="customerName">Full Name</label>
 
             <input
                 type="text"
@@ -139,12 +160,7 @@
                 required
             >
 
-
-            <!-- CUSTOMER EMAIL -->
-
-            <label for="customerEmail">
-                Email Address
-            </label>
+            <label for="customerEmail">Email Address</label>
 
             <input
                 type="email"
@@ -155,51 +171,61 @@
                 required
             >
 
-
             <!-- DESTINATION -->
 
-            <label for="destination">
-                Select Destination
-            </label>
+            <label for="destination">Select Destination</label>
 
-            <select
-                name="destination"
-                id="destination"
-                required
-            >
-
-                <option value="">
-                    Loading destinations...
-                </option>
-
+            <select name="destination" id="destination" required>
+                <option value="">Loading destinations...</option>
             </select>
-
 
             <!-- HOTEL -->
 
-            <label for="hotel_name">
-                Select Hotel
-            </label>
+            <label for="hotel_name">Select Hotel</label>
 
-            <select
-                name="hotel_name"
-                id="hotel_name"
-                required
-                disabled
-            >
-
-                <option value="">
-                    First select a destination
-                </option>
-
+            <select name="hotel_name" id="hotel_name" required disabled>
+                <option value="">First select a destination</option>
             </select>
 
+            <!-- CHECK-IN AND CHECK-OUT DATES -->
 
-            <!-- NUMBER OF NIGHTS -->
+            <h3>Stay Details</h3>
 
-            <label for="nights">
-                Number of Nights
-            </label>
+            <div class="date-fields">
+
+                <div class="date-field">
+                    <label for="check_in_date">Check-in Date</label>
+
+                    <input
+                        type="date"
+                        id="check_in_date"
+                        name="check_in_date"
+                        required
+                    >
+                </div>
+
+                <div class="date-field">
+                    <label for="check_out_date">Check-out Date</label>
+
+                    <input
+                        type="date"
+                        id="check_out_date"
+                        name="check_out_date"
+                        required
+                        disabled
+                    >
+                </div>
+
+            </div>
+
+            <p class="date-info">
+                Select your check-in and check-out dates.
+                Your number of nights will be calculated automatically.
+            </p>
+
+            <!-- AUTOMATIC NIGHTS -->
+
+            <label for="nights">Number of Nights</label>
 
             <input
                 type="number"
@@ -209,70 +235,72 @@
                 min="1"
                 max="365"
                 step="1"
+                readonly
                 required
             >
 
+            <!-- ROOM SELECTION -->
 
-            <!-- =====================================
-                 PRICE CALCULATION
-            ====================================== -->
+            <h3>Room and Guest Details</h3>
+
+            <label for="roomCount">Number of Rooms</label>
+
+            <input
+                type="number"
+                id="roomCount"
+                min="1"
+                max="10"
+                value="1"
+                step="1"
+                required
+            >
+
+            <p class="room-info">
+                You can select up to 10 rooms.
+                Each room can have 1 to 5 guests.
+            </p>
+
+            <div id="roomGuestsContainer"></div>
+
+            <!-- PRICE SUMMARY -->
 
             <div class="price-box">
 
-                <h3>
-                    Booking Price Summary
-                </h3>
+                <h3>Booking Price Summary</h3>
 
                 <div class="price-row">
-
-                    <span>
-                        Price per Night:
-                    </span>
-
-                    <strong id="hotelPrice">
-                        ₹0
-                    </strong>
-
+                    <span>Price per Night:</span>
+                    <strong id="hotelPrice">₹0</strong>
                 </div>
 
                 <div class="price-row">
+                    <span>Number of Nights:</span>
+                    <strong id="displayNights">1</strong>
+                </div>
 
-                    <span>
-                        Number of Nights:
-                    </span>
-
-                    <strong id="displayNights">
-                        1
-                    </strong>
-
+                <div class="price-row">
+                    <span>Number of Rooms:</span>
+                    <strong id="displayRooms">1</strong>
                 </div>
 
                 <hr>
 
                 <div class="price-row total-price-row">
+                    <h3>Total Amount:</h3>
 
-                    <h3>
-                        Total Amount:
-                    </h3>
-
-                    <span
-                        id="totalPrice"
-                        aria-live="polite"
-                    >
+                    <span id="totalPrice" aria-live="polite">
                         ₹0
                     </span>
-
                 </div>
 
                 <p class="price-note">
-                    Total amount is calculated automatically
-                    according to the selected hotel and number of nights.
+                    The total is calculated using the hotel price,
+                    number of rooms and number of nights.
                 </p>
 
             </div>
 
-
-            <!-- CUSTOMER MESSAGE -->
+            <!-- MESSAGE -->
 
             <label for="bookingMessageInput">
                 Message (Optional)
@@ -285,8 +313,7 @@
                 placeholder="Enter any special request..."
             ></textarea>
 
-
-            <!-- BOOKING BUTTON -->
+            <!-- SUBMIT -->
 
             <button
                 type="submit"
@@ -295,9 +322,6 @@
             >
                 Submit Booking
             </button>
-
-
-            <!-- BOOKING RESPONSE -->
 
             <p
                 id="bookingMessage"
@@ -309,34 +333,270 @@
 
     </section>
 
-
-    <!-- =====================================
-         5. FOOTER
-    ====================================== -->
+    <!-- FOOTER -->
 
     <footer>
-
-        <h3>
-            WanderWay Travels
-        </h3>
-
-        <p>
-            Explore more. Travel better.
-        </p>
-
-        <p>
-            © 2026 WanderWay Travels
-        </p>
-
+        <h3>WanderWay Travels</h3>
+        <p>Explore more. Travel better.</p>
+        <p>© 2026 WanderWay Travels</p>
     </footer>
 
+    <!-- ROOM AND GUEST GENERATOR -->
 
-    <!-- =====================================
-         6. JAVASCRIPT
-    ====================================== -->
+    <script>
+        "use strict";
+
+        const roomCountInput = document.getElementById("roomCount");
+        const roomContainer = document.getElementById("roomGuestsContainer");
+
+        function createGuestFields(roomNumber, guestCount) {
+
+            const roomCard = document.createElement("div");
+            roomCard.className = "room-card";
+            roomCard.dataset.roomIndex = roomNumber - 1;
+
+            const heading = document.createElement("h3");
+            heading.textContent = "Room " + roomNumber;
+            roomCard.appendChild(heading);
+
+            const label = document.createElement("label");
+            label.textContent = "Number of Guests";
+
+            const select = document.createElement("select");
+            select.className = "guest-count";
+            select.dataset.roomIndex = roomNumber - 1;
+
+            for (let i = 1; i <= 5; i++) {
+
+                const option = document.createElement("option");
+                option.value = i;
+                option.textContent = i + (i === 1 ? " Guest" : " Guests");
+
+                if (i === guestCount) {
+                    option.selected = true;
+                }
+
+                select.appendChild(option);
+            }
+
+            label.appendChild(select);
+            roomCard.appendChild(label);
+
+            const guestsContainer = document.createElement("div");
+            guestsContainer.className = "guests-container";
+
+            function renderGuests(count) {
+
+                guestsContainer.innerHTML = "";
+
+                for (let i = 0; i < count; i++) {
+
+                    const guestCard = document.createElement("div");
+                    guestCard.className = "guest-card";
+
+                    const guestHeading = document.createElement("h4");
+                    guestHeading.textContent = "Guest " + (i + 1);
+                    guestCard.appendChild(guestHeading);
+
+                    // GUEST NAME
+
+                    const nameLabel = document.createElement("label");
+                    nameLabel.textContent = "Guest Full Name";
+
+                    const nameInput = document.createElement("input");
+                    nameInput.type = "text";
+                    nameInput.className = "guest-name";
+                    nameInput.placeholder = "Enter guest name";
+                    nameInput.maxLength = 100;
+                    nameInput.required = true;
+
+                    nameLabel.appendChild(nameInput);
+                    guestCard.appendChild(nameLabel);
+
+                    // GUEST AGE
+
+                    const ageLabel = document.createElement("label");
+                    ageLabel.textContent = "Guest Age (Optional)";
+
+                    const ageInput = document.createElement("input");
+                    ageInput.type = "number";
+                    ageInput.className = "guest-age";
+                    ageInput.min = 0;
+                    ageInput.max = 120;
+                    ageInput.placeholder = "Enter age";
+
+                    ageLabel.appendChild(ageInput);
+                    guestCard.appendChild(ageLabel);
+
+                    // GUEST MOBILE NUMBER
+
+                    const mobileLabel = document.createElement("label");
+                    mobileLabel.textContent = "Guest Mobile Number (Optional)";
+
+                    const mobileInput = document.createElement("input");
+                    mobileInput.type = "tel";
+                    mobileInput.className = "guest-mobile";
+                    mobileInput.placeholder = "Enter guest mobile number";
+                    mobileInput.maxLength = 15;
+                    mobileInput.autocomplete = "off";
+                    mobileInput.inputMode = "tel";
+
+                    mobileLabel.appendChild(mobileInput);
+                    guestCard.appendChild(mobileLabel);
+
+                    // GUEST EMAIL
+
+                    const emailLabel = document.createElement("label");
+                    emailLabel.textContent = "Guest Email ID (Optional)";
+
+                    const emailInput = document.createElement("input");
+                    emailInput.type = "email";
+                    emailInput.className = "guest-email";
+                    emailInput.placeholder = "Enter guest email address";
+                    emailInput.maxLength = 254;
+                    emailInput.autocomplete = "off";
+
+                    emailLabel.appendChild(emailInput);
+                    guestCard.appendChild(emailLabel);
+
+                    // AADHAAR LAST FOUR DIGITS
+
+                    const aadhaarLabel = document.createElement("label");
+                    aadhaarLabel.textContent = "Aadhaar Last 4 Digits (Optional)";
+
+                    const aadhaarInput = document.createElement("input");
+                    aadhaarInput.type = "text";
+                    aadhaarInput.className = "guest-aadhaar-last4";
+                    aadhaarInput.placeholder = "Enter last 4 digits";
+                    aadhaarInput.maxLength = 4;
+                    aadhaarInput.inputMode = "numeric";
+                    aadhaarInput.pattern = "[0-9]{4}";
+
+                    aadhaarLabel.appendChild(aadhaarInput);
+                    guestCard.appendChild(aadhaarLabel);
+
+                    // PAN LAST FOUR CHARACTERS
+
+                    const panLabel = document.createElement("label");
+                    panLabel.textContent = "PAN Last 4 Characters (Optional)";
+
+                    const panInput = document.createElement("input");
+                    panInput.type = "text";
+                    panInput.className = "guest-pan-last4";
+                    panInput.placeholder = "Enter last 4 characters";
+                    panInput.maxLength = 4;
+                    panInput.autocomplete = "off";
+                    panInput.pattern = "[A-Za-z0-9]{4}";
+
+                    panLabel.appendChild(panInput);
+                    guestCard.appendChild(panLabel);
+
+                    const idInfo = document.createElement("p");
+                    idInfo.className = "id-info";
+                    idInfo.textContent =
+                        "For privacy, enter only the last four characters of your ID numbers. Do not enter complete ID numbers.";
+
+                    guestCard.appendChild(idInfo);
+
+                    guestsContainer.appendChild(guestCard);
+                }
+            }
+
+            renderGuests(guestCount);
+
+            select.addEventListener("change", function () {
+                renderGuests(Number(select.value));
+            });
+
+            roomCard.appendChild(guestsContainer);
+
+            return roomCard;
+        }
+
+        // RENDER ROOMS
+
+        function renderRooms() {
+
+            const count = Number(roomCountInput.value);
+
+            if (!Number.isInteger(count) || count < 1 || count > 10) {
+
+                roomCountInput.setCustomValidity(
+                    "Please select between 1 and 10 rooms."
+                );
+
+                return;
+            }
+
+            roomCountInput.setCustomValidity("");
+            roomContainer.innerHTML = "";
+
+            for (let i = 1; i <= count; i++) {
+                roomContainer.appendChild(createGuestFields(i, 1));
+            }
+
+            const displayRooms = document.getElementById("displayRooms");
+
+            if (displayRooms) {
+                displayRooms.textContent = count;
+            }
+        }
+
+        roomCountInput.addEventListener("input", renderRooms);
+
+        // BOOKING DATA FOR MAIN SCRIPT.JS
+
+        window.getBookingRooms = function () {
+
+            const roomCards = roomContainer.querySelectorAll(".room-card");
+
+            return Array.from(roomCards).map(roomCard => {
+
+                const guestCards = roomCard.querySelectorAll(".guest-card");
+
+                return {
+                    guests: Array.from(guestCards).map(guestCard => {
+
+                        const name = guestCard.querySelector(".guest-name").value.trim();
+
+                        const ageValue = guestCard.querySelector(".guest-age").value;
+
+                        const mobile = guestCard.querySelector(
+                            ".guest-mobile"
+                        ).value.trim();
+
+                        const email = guestCard.querySelector(
+                            ".guest-email"
+                        ).value.trim();
+
+                        const aadhaarLast4 = guestCard.querySelector(
+                            ".guest-aadhaar-last4"
+                        ).value.trim();
+
+                        const panLast4 = guestCard.querySelector(
+                            ".guest-pan-last4"
+                        ).value.trim().toUpperCase();
+
+                        return {
+                            name: name,
+                            age: ageValue === "" ? null : Number(ageValue),
+                            mobile: mobile,
+                            email: email,
+                            aadhaar_last4: aadhaarLast4,
+                            pan_last4: panLast4
+                        };
+                    })
+                };
+            });
+        };
+
+        renderRooms();
+
+    </script>
+
+    <!-- EXISTING MAIN JAVASCRIPT -->
 
     <script src="script.js"></script>
 
 </body>
-
 </html>
