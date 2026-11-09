@@ -1,3 +1,4 @@
+
 "use strict";
 
 const API = "/api";
@@ -110,7 +111,7 @@ function updateTotalPayment(bookings) {
 // 5. DISPLAY GUEST PERSONAL DETAILS
 // ================================================
 
-function getGuestIdentityHTML(guest) {
+function getGuestIdentityHTML(guest, bookingMessage = "") {
 
     const mobile = guest.mobile
         ? escapeHTML(guest.mobile)
@@ -127,6 +128,12 @@ function getGuestIdentityHTML(guest) {
     const pan = guest.pan_last4
         ? escapeHTML(guest.pan_last4)
         : "Not provided";
+
+    const cleanMessage = String(bookingMessage ?? "").trim();
+
+    const message = cleanMessage
+        ? escapeHTML(cleanMessage)
+        : "No message provided";
 
     return `
         <div style="
@@ -158,6 +165,18 @@ function getGuestIdentityHTML(guest) {
                 ${pan}
             </div>
 
+            <div style="
+                margin-top:8px;
+                padding:8px;
+                background:#ffffff;
+                border-left:3px solid #2563eb;
+                border-radius:4px;
+                overflow-wrap:anywhere;
+            ">
+                <strong>Customer Message:</strong>
+                <div>${message}</div>
+            </div>
+
         </div>
     `;
 }
@@ -177,6 +196,18 @@ function getRoomDetailsHTML(booking) {
             <details>
                 <summary>View Rooms & Guests</summary>
                 <p>No separate room details available.</p>
+
+                <div style="
+                    padding:10px;
+                    background:#f4f7fb;
+                    margin-top:8px;
+                    border-radius:5px;
+                ">
+                    <strong>Customer Message:</strong>
+                    <div>
+                        ${escapeHTML(String(booking.message || "").trim() || "No message provided")}
+                    </div>
+                </div>
             </details>
         `;
     }
@@ -222,6 +253,11 @@ function getRoomDetailsHTML(booking) {
 
         guests.forEach((guest, guestIndex) => {
 
+            const message =
+                index === 0 && guestIndex === 0
+                    ? booking.message
+                    : "";
+
             html += `
                 <li style="margin-bottom:12px;">
 
@@ -234,7 +270,7 @@ function getRoomDetailsHTML(booking) {
                             : ""
                     }
 
-                    ${getGuestIdentityHTML(guest)}
+                    ${getGuestIdentityHTML(guest, message)}
 
                 </li>
             `;
@@ -295,7 +331,13 @@ function loadGuestRoomDetails(bookings) {
 
         if (rooms.length === 0) {
 
-            guestHTML = "No separate guest details available.";
+            guestHTML = `
+                No separate guest details available.
+                <div style="margin-top:8px;">
+                    <strong>Customer Message:</strong>
+                    ${escapeHTML(String(booking.message || "").trim() || "No message provided")}
+                </div>
+            `;
 
         } else {
 
@@ -322,6 +364,11 @@ function loadGuestRoomDetails(bookings) {
 
                 guests.forEach((guest, guestIndex) => {
 
+                    const message =
+                        index === 0 && guestIndex === 0
+                            ? booking.message
+                            : "";
+
                     guestHTML += `
                         <li style="margin-bottom:12px;">
 
@@ -334,7 +381,7 @@ function loadGuestRoomDetails(bookings) {
                                     : ""
                             }
 
-                            ${getGuestIdentityHTML(guest)}
+                            ${getGuestIdentityHTML(guest, message)}
 
                         </li>
                     `;
@@ -391,10 +438,8 @@ async function loadBookings() {
         throw new Error("Invalid booking data received.");
     }
 
-    // Update total booking amount
     updateTotalPayment(bookings);
 
-    // Update guest and room section
     loadGuestRoomDetails(bookings);
 
     if (bookings.length === 0) {
