@@ -39,6 +39,7 @@
         }
 
         .guest-card input,
+        .guest-card textarea,
         .room-card select,
         .room-card input {
             width: 100%;
@@ -47,13 +48,51 @@
             margin-top: 5px;
         }
 
+        .guest-card textarea {
+            min-height: 80px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .guest-card textarea {
+            min-height: 80px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        /* IDENTITY DETAILS DESIGN */
+
+        .identity-details {
+            margin-top: 15px;
+            padding: 12px;
+            background: #f4f6f9;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+        .identity-details h5 {
+            margin: 0 0 10px;
+            font-size: 16px;
+            color: #123b5d;
+        }
+
+        .identity-details p {
+            font-size: 12px;
+            color: #555;
+            margin: 5px 0 10px;
+        }
+
+        .room-card select {
+            max-width: 250px;
+        }
+
+
         .room-card select {
             max-width: 250px;
         }
 
         .room-info,
-        .date-info,
-        .id-info {
+        .date-info {
             color: #555;
             font-size: 14px;
             margin-top: 5px;
@@ -85,11 +124,89 @@
             cursor: not-allowed;
         }
 
+        /* PAYMENT METHOD */
+
+        .payment-method-box {
+            background: #f4f6f9;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 18px;
+            margin: 20px 0;
+        }
+
+        .payment-method-box h3 {
+            margin-top: 0;
+            margin-bottom: 12px;
+        }
+
+        .payment-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 13px;
+            margin: 10px 0;
+            cursor: pointer;
+        }
+
+        .payment-option input {
+            width: auto;
+            margin: 0;
+            cursor: pointer;
+        }
+
+        .payment-option span {
+            font-weight: 600;
+        }
+
+        .payment-info {
+            color: #555;
+            font-size: 13px;
+            margin: 5px 0 0 28px;
+        }
+
         @media (max-width: 600px) {
             .date-fields {
                 grid-template-columns: 1fr;
             }
         }
+
+.payment-method-box {
+    margin: 20px 0;
+    padding: 18px;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    background: #ffffff;
+}
+
+.payment-method-box h3 {
+    margin-top: 0;
+    color: #123b5d;
+}
+
+.payment-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 12px 0;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.payment-option input {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.payment-info {
+    margin: 5px 0 12px 28px;
+    color: #666;
+    font-size: 13px;
+}
+
     </style>
 </head>
 
@@ -300,18 +417,52 @@
 
             </div>
 
-            <!-- MESSAGE -->
+            <!-- NEW PAYMENT METHOD SECTION -->
+<!-- PAYMENT METHOD SECTION -->
 
-            <label for="bookingMessageInput">
-                Message (Optional)
-            </label>
+<div class="payment-method-box">
 
-            <textarea
-                name="message"
-                id="bookingMessageInput"
-                rows="4"
-                placeholder="Enter any special request..."
-            ></textarea>
+    <h3>Select Payment Method</h3>
+
+    <p>Please select how you want to pay for your booking.</p>
+
+    <label class="payment-option" for="paymentCash">
+
+        <input
+            type="radio"
+            id="paymentCash"
+            name="payment_method"
+            value="Cash"
+            required
+        >
+
+        <span>Cash</span>
+
+    </label>
+
+    <p class="payment-info">
+        Pay by cash at the hotel.
+    </p>
+
+    <label class="payment-option" for="paymentNetBanking">
+
+        <input
+            type="radio"
+            id="paymentNetBanking"
+            name="payment_method"
+            value="Netbanking"
+            required
+        >
+
+        <span>Net Banking</span>
+
+    </label>
+
+    <p class="payment-info">
+        Select net banking as your preferred payment method.
+    </p>
+
+</div>
 
             <!-- SUBMIT -->
 
@@ -416,14 +567,15 @@
                     // GUEST AGE
 
                     const ageLabel = document.createElement("label");
-                    ageLabel.textContent = "Guest Age (Optional)";
+                    ageLabel.textContent = "Guest Age";
 
                     const ageInput = document.createElement("input");
                     ageInput.type = "number";
                     ageInput.className = "guest-age";
-                    ageInput.min = 0;
+                    ageInput.min = 1;
                     ageInput.max = 120;
                     ageInput.placeholder = "Enter age";
+                    ageInput.required = true;
 
                     ageLabel.appendChild(ageInput);
                     guestCard.appendChild(ageLabel);
@@ -431,7 +583,7 @@
                     // GUEST MOBILE NUMBER
 
                     const mobileLabel = document.createElement("label");
-                    mobileLabel.textContent = "Guest Mobile Number (Optional)";
+                    mobileLabel.textContent = "Guest Mobile Number";
 
                     const mobileInput = document.createElement("input");
                     mobileInput.type = "tel";
@@ -440,6 +592,8 @@
                     mobileInput.maxLength = 15;
                     mobileInput.autocomplete = "off";
                     mobileInput.inputMode = "tel";
+                    mobileInput.required = true;
+                    mobileInput.pattern = "[0-9+() -]{10,15}";
 
                     mobileLabel.appendChild(mobileInput);
                     guestCard.appendChild(mobileLabel);
@@ -447,7 +601,7 @@
                     // GUEST EMAIL
 
                     const emailLabel = document.createElement("label");
-                    emailLabel.textContent = "Guest Email ID (Optional)";
+                    emailLabel.textContent = "Guest Email ID";
 
                     const emailInput = document.createElement("input");
                     emailInput.type = "email";
@@ -455,48 +609,79 @@
                     emailInput.placeholder = "Enter guest email address";
                     emailInput.maxLength = 254;
                     emailInput.autocomplete = "off";
+                    emailInput.required = true;
 
                     emailLabel.appendChild(emailInput);
                     guestCard.appendChild(emailLabel);
 
-                    // AADHAAR LAST FOUR DIGITS
+                    // GUEST MESSAGE
 
-                    const aadhaarLabel = document.createElement("label");
-                    aadhaarLabel.textContent = "Aadhaar Last 4 Digits (Optional)";
+                    const messageLabel = document.createElement("label");
+                    messageLabel.textContent = "Guest Message (Optional)";
 
-                    const aadhaarInput = document.createElement("input");
-                    aadhaarInput.type = "text";
-                    aadhaarInput.className = "guest-aadhaar-last4";
-                    aadhaarInput.placeholder = "Enter last 4 digits";
-                    aadhaarInput.maxLength = 4;
-                    aadhaarInput.inputMode = "numeric";
-                    aadhaarInput.pattern = "[0-9]{4}";
+                    const messageInput = document.createElement("textarea");
+                    messageInput.className = "guest-message";
+                    messageInput.rows = 3;
+                    messageInput.maxLength = 1000;
+                    messageInput.placeholder =
+                        "Enter your message or special request...";
 
-                    aadhaarLabel.appendChild(aadhaarInput);
-                    guestCard.appendChild(aadhaarLabel);
+                    messageLabel.appendChild(messageInput);
+                    guestCard.appendChild(messageLabel);
 
-                    // PAN LAST FOUR CHARACTERS
+// FICTIONAL DEMO CODE DETAILS
 
-                    const panLabel = document.createElement("label");
-                    panLabel.textContent = "PAN Last 4 Characters (Optional)";
+const identityBox = document.createElement("div");
+identityBox.className = "identity-details";
 
-                    const panInput = document.createElement("input");
-                    panInput.type = "text";
-                    panInput.className = "guest-pan-last4";
-                    panInput.placeholder = "Enter last 4 characters";
-                    panInput.maxLength = 4;
-                    panInput.autocomplete = "off";
-                    panInput.pattern = "[A-Za-z0-9]{4}";
+const identityHeading = document.createElement("h5");
+identityHeading.textContent = "Custom Demo Details";
+identityBox.appendChild(identityHeading);
 
-                    panLabel.appendChild(panInput);
-                    guestCard.appendChild(panLabel);
+const identityNote = document.createElement("p");
+identityNote.textContent =
+    "Use invented demo codes only. Never enter actual Aadhaar or PAN details.";
+identityBox.appendChild(identityNote);
 
-                    const idInfo = document.createElement("p");
-                    idInfo.className = "id-info";
-                    idInfo.textContent =
-                        "For privacy, enter only the last four characters of your ID numbers. Do not enter complete ID numbers.";
+// CUSTOM DEMO CODE 1
 
-                    guestCard.appendChild(idInfo);
+const demoLabel1 = document.createElement("label");
+demoLabel1.textContent = "Custom Demo Code 1";
+
+const demoInput1 = document.createElement("input");
+demoInput1.type = "text";
+demoInput1.className = "guest-demo-code-1";
+demoInput1.placeholder = "Example: DEMO-RAHUL-8392";
+demoInput1.maxLength = 30;
+demoInput1.autocomplete = "off";
+
+// CUSTOM DEMO CODE 2
+
+const demoLabel2 = document.createElement("label");
+demoLabel2.textContent = "Custom Demo Code 2";
+
+const demoInput2 = document.createElement("input");
+demoInput2.type = "text";
+demoInput2.className = "guest-demo-code-2";
+demoInput2.placeholder = "Example: TEST-X7K9-P2";
+demoInput2.maxLength = 30;
+demoInput2.autocomplete = "off";
+
+demoLabel1.appendChild(demoInput1);
+identityBox.appendChild(demoLabel1);
+
+demoLabel2.appendChild(demoInput2);
+identityBox.appendChild(demoLabel2);
+
+guestCard.appendChild(identityBox);
+
+
+
+                    
+                    
+
+                    guestCard.appendChild(identityBox);
+
 
                     guestsContainer.appendChild(guestCard);
                 }
@@ -543,60 +728,68 @@
         }
 
         roomCountInput.addEventListener("input", renderRooms);
+        roomCountInput.addEventListener("change", renderRooms);
 
-        // BOOKING DATA FOR MAIN SCRIPT.JS
+ 
 
-        window.getBookingRooms = function () {
 
-            const roomCards = roomContainer.querySelectorAll(".room-card");
+// BOOKING DATA FOR MAIN SCRIPT.JS
 
-            return Array.from(roomCards).map(roomCard => {
 
-                const guestCards = roomCard.querySelectorAll(".guest-card");
+window.getBookingRooms = function () {
+
+    const roomCards = roomContainer.querySelectorAll(".room-card");
+
+    return Array.from(roomCards).map(roomCard => {
+
+        const guestCards = roomCard.querySelectorAll(".guest-card");
+
+        return {
+            guests: Array.from(guestCards).map(guestCard => {
+
+                const name = guestCard.querySelector(".guest-name").value.trim();
+                const ageValue = guestCard.querySelector(".guest-age").value;
+                const mobile = guestCard.querySelector(".guest-mobile").value.trim();
+                const email = guestCard.querySelector(".guest-email").value.trim();
+                const message = guestCard.querySelector(".guest-message").value.trim();
+
+                // FICTIONAL DEMO CODES ONLY
+                const demoCode1 = guestCard.querySelector(".guest-demo-code-1").value.trim();
+                const demoCode2 = guestCard.querySelector(".guest-demo-code-2").value.trim();
 
                 return {
-                    guests: Array.from(guestCards).map(guestCard => {
-
-                        const name = guestCard.querySelector(".guest-name").value.trim();
-
-                        const ageValue = guestCard.querySelector(".guest-age").value;
-
-                        const mobile = guestCard.querySelector(
-                            ".guest-mobile"
-                        ).value.trim();
-
-                        const email = guestCard.querySelector(
-                            ".guest-email"
-                        ).value.trim();
-
-                        const aadhaarLast4 = guestCard.querySelector(
-                            ".guest-aadhaar-last4"
-                        ).value.trim();
-
-                        const panLast4 = guestCard.querySelector(
-                            ".guest-pan-last4"
-                        ).value.trim().toUpperCase();
-
-                        return {
-                            name: name,
-                            age: ageValue === "" ? null : Number(ageValue),
-                            mobile: mobile,
-                            email: email,
-                            aadhaar_last4: aadhaarLast4,
-                            pan_last4: panLast4
-                        };
-                    })
+                    name: name,
+                    age: ageValue,
+                    mobile: mobile,
+                    email: email,
+                    message: message,
+                    demoCode1: demoCode1,
+                    demoCode2: demoCode2
                 };
-            });
+            })
         };
+    });
+};
 
-        renderRooms();
 
-    </script>
 
-    <!-- EXISTING MAIN JAVASCRIPT -->
+// GET SELECTED PAYMENT METHOD FOR MAIN SCRIPT.JS
 
-    <script src="script.js"></script>
+window.getPaymentMethod = function () {
+
+    const selectedPayment = document.querySelector(
+        'input[name="payment_method"]:checked'
+    );
+
+    return selectedPayment ? selectedPayment.value : "";
+};
+
+renderRooms();
+
+</script>
+
+<!-- EXISTING MAIN JAVASCRIPT -->
+<script src="script.js"></script>
 
 </body>
 </html>

@@ -153,7 +153,39 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     // ==========================================
-    // 2A. CHECK-IN / CHECK-OUT DATE FUNCTIONS
+    // 2A. PAYMENT METHOD FUNCTIONS
+    // ==========================================
+
+function getSelectedPaymentMethod() {
+    const selectedPayment = document.querySelector(
+        'input[name="payment_method"]:checked'
+    );
+
+    return selectedPayment ? selectedPayment.value : "";
+}
+
+function validatePaymentMethod() {
+    const paymentMethod = getSelectedPaymentMethod();
+
+    if (
+        paymentMethod !== "Cash" &&
+        paymentMethod !== "Netbanking"
+    ) {
+        return {
+            valid: false,
+            message: "Please select a payment method: Cash or Net Banking."
+        };
+    }
+
+    return {
+        valid: true,
+        paymentMethod
+    };
+}
+
+
+    // ==========================================
+    // 2B. CHECK-IN / CHECK-OUT DATE FUNCTIONS
     // ==========================================
 
     function getTodayDateString() {
@@ -213,9 +245,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         checkInInput.min = today;
 
-        checkOutInput.disabled = !checkInInput.value;
+        const validCheckIn =
+            isValidDateString(checkInInput.value) &&
+            checkInInput.value >= today;
 
-        if (checkInInput.value) {
+        checkOutInput.disabled = !validCheckIn;
+
+        if (validCheckIn) {
             const minimumCheckout =
                 getNextDateString(checkInInput.value);
 
@@ -223,7 +259,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             if (
                 checkOutInput.value &&
-                checkOutInput.value < minimumCheckout
+                (
+                    !isValidDateString(checkOutInput.value) ||
+                    checkOutInput.value < minimumCheckout
+                )
             ) {
                 checkOutInput.value = "";
             }
@@ -1411,6 +1450,37 @@ document.addEventListener("DOMContentLoaded", async () => {
                 return;
             }
 
+            // ==========================================
+            // VALIDATE PAYMENT METHOD
+            // ==========================================
+
+            const paymentValidation = validatePaymentMethod();
+
+            if (!paymentValidation.valid) {
+                if (bookingMessage) {
+                    bookingMessage.textContent =
+                        paymentValidation.message;
+
+                    bookingMessage.style.color = "red";
+                }
+
+                document.querySelector(
+                    ".payment-method-box"
+                )?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center"
+                });
+
+                return;
+            }
+
+            const paymentMethod =
+                paymentValidation.paymentMethod;
+
+            // ==========================================
+            // VALIDATE NUMBER OF ROOMS
+            // ==========================================
+
             const numberOfRooms = Number(roomCountInput?.value);
 
             if (
@@ -1427,6 +1497,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
                 return;
             }
+
+            // ==========================================
+            // VALIDATE ALL ROOM AND GUEST DETAILS
+            // ==========================================
 
             let rooms = [];
 
@@ -1463,42 +1537,114 @@ document.addEventListener("DOMContentLoaded", async () => {
                     }
 
                     for (let j = 0; j < guests.length; j++) {
+                        const guest = guests[j];
+
+                        const guestNumber = j + 1;
+                        const roomNumber = i + 1;
+
+                        // GUEST NAME
+
                         const guestName =
-                            String(guests[j]?.name || "").trim();
+                            String(guest?.name || "").trim();
 
                         if (!guestName) {
                             throw new Error(
-                                "Please enter the name of guest " +
-                                (j + 1) + " in Room " + (i + 1) + "."
+                                "Please enter the name of Guest " +
+                                guestNumber + " in Room " + roomNumber + "."
                             );
                         }
 
-                        guests[j].name = guestName;
+                        guest.name = guestName;
 
-                        const ageValue = guests[j].age;
+                        // GUEST AGE
+
+                        const ageValue = guest?.age;
 
                         if (
-                            ageValue !== "" &&
-                            ageValue !== null &&
-                            ageValue !== undefined
+                            ageValue === "" ||
+                            ageValue === null ||
+                            ageValue === undefined
                         ) {
-                            const age = Number(ageValue);
-
-                            if (
-                                !Number.isInteger(age) ||
-                                age < 0 ||
-                                age > 120
-                            ) {
-                                throw new Error(
-                                    "Please enter a valid age for guest " +
-                                    (j + 1) + " in Room " + (i + 1) + "."
-                                );
-                            }
-
-                            guests[j].age = age;
-                        } else {
-                            guests[j].age = null;
+                            throw new Error(
+                                "Please enter the age of Guest " +
+                                guestNumber + " in Room " + roomNumber + "."
+                            );
                         }
+
+                        const age = Number(ageValue);
+
+                        if (
+                            !Number.isInteger(age) ||
+                            age < 1 ||
+                            age > 120
+                        ) {
+                            throw new Error(
+                                "Please enter a valid age between 1 and 120 for Guest " +
+                                guestNumber + " in Room " + roomNumber + "."
+                            );
+                        }
+
+                        guest.age = age;
+
+                        // GUEST MOBILE NUMBER
+
+                        const mobile =
+                            String(guest?.mobile || "").trim();
+
+                        if (!mobile) {
+                            throw new Error(
+                                "Please enter the mobile number of Guest " +
+                                guestNumber + " in Room " + roomNumber + "."
+                            );
+                        }
+
+                        if (!/^[0-9+() -]{10,15}$/.test(mobile)) {
+                            throw new Error(
+                                "Please enter a valid mobile number for Guest " +
+                                guestNumber + " in Room " + roomNumber + "."
+                            );
+                        }
+
+                        guest.mobile = mobile;
+
+                        // GUEST EMAIL
+
+                        const email =
+                            String(guest?.email || "").trim();
+
+                        if (!email) {
+                            throw new Error(
+                                "Please enter the email of Guest " +
+                                guestNumber + " in Room " + roomNumber + "."
+                            );
+                        }
+
+                        const emailPattern =
+                            /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+                        if (!emailPattern.test(email)) {
+                            throw new Error(
+                                "Please enter a valid email for Guest " +
+                                guestNumber + " in Room " + roomNumber + "."
+                            );
+                        }
+
+                        guest.email = email;
+
+                        // GUEST MESSAGE
+
+                        const guestMessage =
+                            String(guest?.message || "").trim();
+
+                        if (guestMessage.length > 1000) {
+                            throw new Error(
+                                "Guest " + guestNumber +
+                                " in Room " + roomNumber +
+                                " message cannot exceed 1000 characters."
+                            );
+                        }
+
+                        guest.message = guestMessage;
                     }
                 }
 
@@ -1513,6 +1659,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                 return;
             }
 
+            // ==========================================
+            // SEND BOOKING TO SERVER
+            // ==========================================
+
             if (bookingButton) {
                 bookingButton.disabled = true;
                 bookingButton.textContent = "Processing...";
@@ -1525,6 +1675,24 @@ document.addEventListener("DOMContentLoaded", async () => {
             try {
                 const formData = new FormData(bookingForm);
 
+                // GUEST DETAILS WITHOUT AADHAAR OR PAN
+
+                
+// GUEST DETAILS WITH FICTIONAL TEST REFERENCES ONLY
+
+const safeRooms = rooms.map(room => ({
+    guests: room.guests.map(guest => ({
+        name: guest.name,
+        age: guest.age,
+        mobile: guest.mobile,
+        email: guest.email,
+        message: String(guest.message || "").trim(),
+
+        demoCode1: String(guest.demoCode1 || "").trim(),
+        demoCode2: String(guest.demoCode2 || "").trim()
+    }))
+}));
+
                 const bookingData = {
                     name: formData.get("name"),
                     email: formData.get("email"),
@@ -1535,8 +1703,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                     check_out_date: dateValidation.checkOut,
 
                     nights: nights,
-                    rooms: rooms,
-                    message: formData.get("message") || ""
+                    rooms: safeRooms,
+
+                    // NEW PAYMENT METHOD FIELD
+                    payment_method: paymentMethod
                 };
 
                 const result = await fetchJSON(
@@ -1568,6 +1738,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
                 if (roomCountInput) {
                     roomCountInput.value = "1";
+
+                    roomCountInput.dispatchEvent(
+                        new Event("input", { bubbles: true })
+                    );
 
                     roomCountInput.dispatchEvent(
                         new Event("change", { bubbles: true })
