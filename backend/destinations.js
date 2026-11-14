@@ -2,7 +2,7 @@
 "use strict";
 
 // ================================================
-// WANDERWAY TRAVELS
+// Route X
 // DESTINATION AND HOTEL CATALOGUE
 // ================================================
 
@@ -261,7 +261,7 @@ function createHotelDescription(
         destination +
         ". Sample facilities include " +
         facilities.join(", ") +
-        ". Created for the WanderWay Travels college project."
+        ". Created for the Route X college project."
     );
 }
 
@@ -506,7 +506,7 @@ async function initializeDestinationHotels(pool) {
         checkHotelImages(hotelCatalogue);
 
         console.log("==================================");
-        console.log("WANDERWAY HOTEL CATALOGUE READY");
+        console.log("Route X HOTEL CATALOGUE READY");
         console.log("Destinations:", totalDestinations);
         console.log("Hotels per destination:", HOTELS_PER_DESTINATION);
         console.log("Total hotels:", hotelCatalogue.length);

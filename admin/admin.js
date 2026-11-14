@@ -195,12 +195,12 @@ const demoCode2 = guest.demoCode2
             </div>
 
             <div>
-    <strong>Custom Demo Code 1:</strong>
+    <strong>Aadhaar – Last 4 Digits (Demo Only):</strong>
     ${demoCode1}
 </div>
 
 <div>
-    <strong>Custom Demo Code 2:</strong>
+    <strong>PAN – Demo Code:</strong>
     ${demoCode2}
 </div>
 
@@ -459,7 +459,7 @@ async function loadBookings() {
         return;
     }
 
-    bookings.forEach(booking => {
+    bookings.forEach((booking, index) => {
         const id = Number(booking.id);
         const rooms = getBookingRooms(booking);
         const totalGuests = getTotalGuests(booking);
@@ -468,7 +468,8 @@ async function loadBookings() {
         const row = document.createElement("tr");
 
         row.innerHTML = `
-            <td>${escapeHTML(booking.id)}</td>
+    <td>${index + 1}</td>
+    <td>${escapeHTML(booking.id)}</td>
 
             <td>${escapeHTML(booking.name)}</td>
 

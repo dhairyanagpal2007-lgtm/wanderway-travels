@@ -1,4 +1,3 @@
-
 document.addEventListener("DOMContentLoaded", async () => {
     "use strict";
 
@@ -18,34 +17,34 @@ document.addEventListener("DOMContentLoaded", async () => {
     const totalPriceInput = document.getElementById("totalPrice");
     const displayNights = document.getElementById("displayNights");
 
-    const roomCountInput = document.getElementById("roomCount");
-    const displayRooms = document.getElementById("displayRooms");
+        const roomCountInput = document.getElementById("roomCount");
+        const displayRooms = document.getElementById("displayRooms");
 
-    const bookingMessage = document.getElementById("bookingMessage");
-    const bookingButton = document.getElementById("bookingButton");
+        const bookingMessage = document.getElementById("bookingMessage");
+        const bookingButton = document.getElementById("bookingButton");
 
-    const popularHotelsContainer =
-        document.getElementById("popularHotels");
+        const popularHotelsContainer =
+            document.getElementById("popularHotels");
 
-    const hotelCount = document.getElementById("hotelCount");
+        const hotelCount = document.getElementById("hotelCount");
 
-    const MAX_HOTELS_PER_DESTINATION = 100;
-    const HOTELS_PER_DESTINATION = 4;
-    const CARDS_PER_PAGE = 12;
+        const MAX_HOTELS_PER_DESTINATION = 100;
+        const HOTELS_PER_DESTINATION = 4;
+        const CARDS_PER_PAGE = 12;
 
-    let allPopularHotels = [];
-    let currentDestinationHotels = [];
-    let visibleHotelCount = CARDS_PER_PAGE;
-    let selectedHotelPrice = 0;
+        let allPopularHotels = [];
+        let currentDestinationHotels = [];
+        let visibleHotelCount = CARDS_PER_PAGE;
+        let selectedHotelPrice = 0;
 
-    // ==========================================
-    // 2. GENERAL HELPER FUNCTIONS
-    // ==========================================
+        // ==========================================
+        // 2. GENERAL HELPER FUNCTIONS
+        // ==========================================
 
-    function getRoomCount() {
-        const count = Number(roomCountInput?.value) || 1;
-        return Math.max(1, Math.min(count, 10));
-    }
+        function getRoomCount() {
+            const count = Number(roomCountInput?.value) || 1;
+            return Math.max(1, Math.min(count, 10));
+        }
 
     function parseArray(value) {
         if (Array.isArray(value)) return value;
@@ -1787,6 +1786,57 @@ const safeRooms = rooms.map(room => ({
             }
         });
     }
+       // Search hotels
+
+if (searchButton) {
+    searchButton.addEventListener("click", () => {
+        console.log("SEARCH BUTTON CLICKED");
+
+        const selectedLocation = searchLoc.value;
+        const budget = Number(searchBudget.value);
+
+        if (!selectedLocation) {
+            searchResults.textContent = "Please select a location.";
+            return;
+        }
+
+        if (!Number.isFinite(budget) || budget <= 0) {
+            searchResults.textContent = "Please enter a valid budget.";
+            return;
+        }
+
+        if (!Array.isArray(allPopularHotels)) {
+            searchResults.textContent = "Hotels are still loading. Please try again.";
+            return;
+        }
+
+        const matchingHotels = allPopularHotels.filter(hotel => {
+            const destination = String(getHotelDestination(hotel)).trim().toLowerCase();
+            const price = Number(getHotelPrice(hotel));
+
+            return destination === selectedLocation.trim().toLowerCase()
+                && Number.isFinite(price)
+                && price <= budget;
+        });
+
+        searchResults.replaceChildren();
+
+        const heading = document.createElement("h3");
+        heading.textContent = matchingHotels.length + " matching hotels found";
+        searchResults.appendChild(heading);
+
+        if (matchingHotels.length === 0) {
+            searchResults.append("No hotels found within this budget.");
+            return;
+        }
+
+        matchingHotels.forEach(hotel => {
+            searchResults.appendChild(createHotelCard(hotel));
+        });
+    });
+}
+
+
 
     // ==========================================
     // 21. INITIALIZE WEBSITE
@@ -1819,3 +1869,47 @@ const safeRooms = rooms.map(room => ({
     await loadPopularHotels();
 
 });
+
+
+// ================================================
+// ROUTE X - STATE AND BUDGET HOTEL SEARCH
+// ================================================
+
+const searchLoc = document.getElementById("searchLoc");
+const searchBudget = document.getElementById("searchBudget");
+const searchButton = document.getElementById("searchHotelsButton");
+const searchResults = document.getElementById("searchResults");
+
+// Fill state dropdown
+if (searchLoc) {
+    fetch("/api/destinations")
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Failed to load destinations");
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log("Destination data:", data);
+
+           const locations = [
+    ...(Array.isArray(data?.states) ? data.states : []),
+    ...(Array.isArray(data?.unionTerritories)
+        ? data.unionTerritories : []),
+    ...(Array.isArray(data?.international)
+        ? data.international : [])
+        ];
+
+                    locations.forEach(location => {
+            const option = document.createElement("option");
+            option.value = location;
+            option.textContent = location;
+            searchLoc.appendChild(option);
+        });
+                })
+                .catch(error => {
+                    console.error("Search state loading error:", error);
+                });
+        }
+
+       

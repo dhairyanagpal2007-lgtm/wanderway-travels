@@ -4,10 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="WanderWay Travels - Explore destinations and discover hotel accommodation across India and around the world.">
+    <meta name="description" content="Route X - Explore destinations and discover hotel accommodation across India and around the world.">
     <meta name="theme-color" content="#123b5d">
 
-    <title>WanderWay Travels | Explore the World</title>
+    <title>Route X | Explore the World</title>
 
     <link rel="stylesheet" href="style.css">
 
@@ -215,14 +215,17 @@
     <!-- NAVIGATION -->
 
     <header class="navbar">
-        <h2>WanderWay Travels</h2>
+        <h2>Route X</h2>
 
-        <nav aria-label="Main navigation">
-            <a href="#home">Home</a>
-            <a href="#hotels">Hotels</a>
-            <a href="#booking">Booking</a>
-            <a href="/admin/login.html">Admin</a>
-        </nav>
+       
+<nav aria-label="Main navigation">
+    <a href="#home">Home</a>
+    <a href="#hotels">Hotels</a>
+    <a href="#booking">Booking</a>
+    <a href="#search">Search</a>
+    <a href="/admin/login.html">Admin</a>
+</nav>
+
     </header>
 
     <!-- HERO SECTION -->
@@ -236,6 +239,42 @@
     </section>
 
     <!-- HOTEL SECTION -->
+
+
+<section class="section" id="search">
+
+    <h2>Find Hotels Within Your Budget</h2>
+
+    <p class="hotel-intro">
+        Select your preferred place and budget to find suitable hotels.
+    </p>
+
+    <div class="search-box">
+
+       <label for="searchLoc">Choose Location</label>
+<select id="searchLoc">
+    <option value="">Select a location</option>
+</select>
+
+        <label for="searchBudget">Maximum Budget Per Night (₹)</label>
+        <input
+            type="number"
+            id="searchBudget"
+            min="1"
+            placeholder="Enter your budget"
+        >
+
+        <button type="button" id="searchHotelsButton">
+            Search Hotels
+        </button>
+
+    </div>
+
+    <div id="searchResults" aria-live="polite"></div>
+
+</section>
+
+
 
     <section class="section" id="hotels">
 
@@ -487,9 +526,9 @@
     <!-- FOOTER -->
 
     <footer>
-        <h3>WanderWay Travels</h3>
+        <h3>Route X</h3>
         <p>Explore more. Travel better.</p>
-        <p>© 2026 WanderWay Travels</p>
+        <p>© 2026 Route X</p>
     </footer>
 
     <!-- ROOM AND GUEST GENERATOR -->
@@ -635,7 +674,7 @@ const identityBox = document.createElement("div");
 identityBox.className = "identity-details";
 
 const identityHeading = document.createElement("h5");
-identityHeading.textContent = "Custom Demo Details";
+identityHeading.textContent = "Identity Details (Demo Only)";
 identityBox.appendChild(identityHeading);
 
 const identityNote = document.createElement("p");
@@ -646,7 +685,7 @@ identityBox.appendChild(identityNote);
 // CUSTOM DEMO CODE 1
 
 const demoLabel1 = document.createElement("label");
-demoLabel1.textContent = "Custom Demo Code 1";
+demoLabel1.textContent = "Aadhaar – Last 4 Digits (Demo Only)";
 
 const demoInput1 = document.createElement("input");
 demoInput1.type = "text";
@@ -655,10 +694,10 @@ demoInput1.placeholder = "Example: DEMO-RAHUL-8392";
 demoInput1.maxLength = 30;
 demoInput1.autocomplete = "off";
 
-// CUSTOM DEMO CODE 2
+// PAN – Demo Code
 
 const demoLabel2 = document.createElement("label");
-demoLabel2.textContent = "Custom Demo Code 2";
+demoLabel2.textContent = "PAN – Demo Code";
 
 const demoInput2 = document.createElement("input");
 demoInput2.type = "text";
